@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import numpy as np
 import argparse
@@ -26,8 +27,8 @@ def make_complexity(ccr):
 
 def positive_integer(str_number):
   number = int(str_number)
-  if number < 0:
-    raise argparse.ArgumentTypeError("%r is negative integer" % (str_number,))
+  if number <= 0:
+    raise argparse.ArgumentTypeError("%r is not positive integer" % (str_number,))
   return number
 
 def restricted_float(str_number):
@@ -97,9 +98,6 @@ def argument_parser():
   parser.add_argument("--output", type = str, default = "output.txt",
                       help="File where to output result")
   args = parser.parse_args()
-  if args.dot:
-    #print("wow!")
-    t = 10
   return args
 
 def get_int_random_number_around(val, percent):
@@ -108,25 +106,25 @@ def get_int_random_number_around(val, percent):
 
 
 class DAG:
-    class Task:
-        def __init__(self):
-            self.tag = 0
-            self.cost = 0.0
-            self.data_size = 0
-            self.alpha = 0.0
-            self.children = []
-            self.task_indexes = []
-            self.complexity = complexity.MIXED
-    class Edge:
-      def __init__(self, Task):
-        self.to_task = Task
-        self.transfer_tag = 0
-        self.communication_cost = 0.0
-
+  class Task:
     def __init__(self):
-        self.number_of_levels = 0
-        self.number_of_tasks_in_level = []
-        self.levels = []
+      self.tag = 0
+      self.cost = 0.0
+      self.data_size = 0
+      self.alpha = 0.0
+      self.children = []
+      self.task_indexes = []
+      self.complexity = complexity.MIXED
+  class Edge:
+    def __init__(self, Task):
+      self.to_task = Task
+      self.transfer_tag = 0
+      self.communication_cost = 0.0
+
+  def __init__(self):
+    self.number_of_levels = 0
+    self.number_of_tasks_in_level = []
+    self.levels = []
 
 
 def generate_dag(args):
@@ -142,11 +140,14 @@ def generate_tasks(graph, args):
   unused = 0.0
   (unused, integral_parts) = np.modf(np.exp(args.fat * np.log(args.n)))
   nb_tasks_per_level = int(integral_parts)
-  print(integral_parts, unused)
+  #print(nb_tasks_per_level)
+  #print(integral_parts, unused)
   total_tasks = 0.0
   while total_tasks < args.n:
     tmp = get_int_random_number_around(nb_tasks_per_level, 100.00 - 100.0 * args.regular)
+    #print(tmp)
     tmp = int(min(tmp, args.n - total_tasks))
+    #print(tmp)
     tmp_array = []
     graph.levels.append(tmp_array)
     graph.number_of_levels += 1
@@ -179,11 +180,11 @@ def generate_dependencies(graph, args):
   for idx in range(1, graph.number_of_levels):
     for task in graph.levels[idx]:
       number_of_parents = min(graph.number_of_tasks_in_level[idx - 1], 1 +
-                              np.random.random_integers(0, int(args.density * graph.number_of_tasks_in_level[idx - 1])))
+                              int(np.random.uniform(0.0, args.density * graph.number_of_tasks_in_level[idx - 1])))
       for jdx in range(number_of_parents):
-        parent_level = idx - np.random.random_integers(1, min(args.jump + 1, idx))
+        parent_level = idx - np.random.random_integers(1, min(args.jump, idx))
         parent_index = np.random.random_integers(0, graph.number_of_tasks_in_level[parent_level] - 1)
-
+        #print(idx, parent_level)
         find_parent_on_this_level = False
         for ptr in range(graph.number_of_tasks_in_level[parent_level]):
           # print(parent_level, parent_index, len(graph.levels[parent_level]), len(graph.levels))
@@ -289,7 +290,7 @@ def dot_print(graph, args):
 def main():
   args = argument_parser()
   graph = generate_dag(args)
-  if (args.dot):
+  if args.dot:
     dot_print(graph, args)
   else:
     dag_print(graph, args)
