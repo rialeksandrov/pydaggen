@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import sys
 import numpy as np
 import argparse
 import math
@@ -136,18 +135,12 @@ def generate_dag(args):
 
 
 def generate_tasks(graph, args):
-  integral_parts = 0.0
-  unused = 0.0
   (unused, integral_parts) = np.modf(np.exp(args.fat * np.log(args.n)))
   nb_tasks_per_level = int(integral_parts)
-  #print(nb_tasks_per_level)
-  #print(integral_parts, unused)
   total_tasks = 0.0
   while total_tasks < args.n:
     tmp = get_int_random_number_around(nb_tasks_per_level, 100.00 - 100.0 * args.regular)
-    #print(tmp)
     tmp = int(min(tmp, args.n - total_tasks))
-    #print(tmp)
     tmp_array = []
     graph.levels.append(tmp_array)
     graph.number_of_levels += 1
@@ -184,10 +177,8 @@ def generate_dependencies(graph, args):
       for jdx in range(number_of_parents):
         parent_level = idx - np.random.random_integers(1, min(args.jump, idx))
         parent_index = np.random.random_integers(0, graph.number_of_tasks_in_level[parent_level] - 1)
-        #print(idx, parent_level)
         find_parent_on_this_level = False
         for ptr in range(graph.number_of_tasks_in_level[parent_level]):
-          # print(parent_level, parent_index, len(graph.levels[parent_level]), len(graph.levels))
           parent = graph.levels[parent_level][parent_index]
           find_child = False
           for children in parent.children:
