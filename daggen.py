@@ -44,7 +44,7 @@ def positive_float(str_number):
 
 def argument_parser():
   parser = argparse.ArgumentParser(description='Daggen', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument("--n", type = positive_integer, default = 100,
+  parser.add_argument("-n", type = positive_integer, default = 100,
                       help = "Positive integer. "
                              "Number of computation nodes in the DAG (i.e., application 'tasks')")
   parser.add_argument("--mindata", type = positive_integer, default = 2048,
